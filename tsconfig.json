@@ -6,6 +6,8 @@
       "dom.iterable",
       "esnext"
     ],
+    "declaration": true,    
+    "declarationMap": true,  
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -18,9 +20,18 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+	"baseUrl": "./",
+	"paths": {
+	  "@/*": ["./src/*"],
+	  "@components/*": ["./src/components/*"],
+	  "@pages/*": ["./src/pages/*"],
+	  "@routes/*": ["./src/routes/*"],
+	  "@styles/*": ["./src/styles/*"]
+	}
   },
   "include": [
-    "src"
+    "src",
+	"./*.d.ts"
   ]
 }
