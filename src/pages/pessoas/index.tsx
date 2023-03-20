@@ -3,28 +3,30 @@ import { useEffect, useState } from "react";
 import PersonalCard from "../../components/personCard";
 import SearchBar from "../../components/searchBar";
 import * as S from "./styles";
+import { AccessToken } from "../../utils/accessToken.util";
 
 export default function Pessoas() {
 
   const [resPeople, setResPeople] = useState<I.PersonBodyRes[]>([] as I.PersonBodyRes[]);
   const [searchBarVal, setSearchBarVal] = useState<string>("");
 
-  const reqAll = () => {
+  const reqAllPeople = () => {
 	Https.getAllPersons()
-	  .then(res => setResPeople(res));	
+	  .then(res => setResPeople(res));
   }
 
-  const reqSearch = () => {
+  const reqSearchPeople = () => {
 	Https.searchPerson(searchBarVal)
 	  .then(res => setResPeople(res));	
   }
 
   useEffect(() => {
 	if (!searchBarVal) {
-	  reqAll();
+	  AccessToken.setAccessToken()
+		.then(reqAllPeople);
 	}
 	if (searchBarVal) {
-	  reqSearch();
+	  reqSearchPeople();
 	}
   }, [searchBarVal]);
 

@@ -1,6 +1,10 @@
 declare module I {
 
   type ContactType = "email" | "tel";
+  
+  interface AuthTokenRes {
+	accessToken: string;
+  }
 
 	interface Person {
 	  id: number;
