@@ -5,4 +5,4 @@ Here's the design: shorturl.at/eDQR5
 
 ### Run the project
 
-Configure the .env file and run `npm run start`;
+Configure the .env file, install the dependecies with `npm install` and then run `npm run start`;
