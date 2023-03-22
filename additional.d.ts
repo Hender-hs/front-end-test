@@ -40,5 +40,6 @@ declare module I {
 	interface ContactBodyReq {
 	  type?: ContactType;
 	  description?: string;
+	  personId: numner;
 	}
 }

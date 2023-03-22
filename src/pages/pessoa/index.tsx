@@ -13,6 +13,7 @@ export default function PersonPage() {
   
   const [personInfo, setPersonInfo] = useState<I.PersonBodyRes>({} as I.PersonBodyRes);
   const [toEditContactId, setToEditContactId] = useState<number>(0);
+  const [toAddNewContact, setToAddNewContact] = useState<number>(0);
   const [renderNotf, setRenderNotf] = useState<boolean>(false);
 
   const getPerson = () => {
@@ -31,7 +32,6 @@ export default function PersonPage() {
   };
 
   const deleteHandler = () => {
-
   	Https.deletePerson(String(personId))
 	  .then(res => res.success && setRenderNotf(true));
 	setTimeout(() => window.location.replace("/"), 700);
@@ -39,12 +39,22 @@ export default function PersonPage() {
 
   const { register, handleSubmit } = useForm<InputForm>();
 
-  const submitFormHandler: SubmitHandler<InputForm> = async (data) => {
+  const submitPersonEdition: SubmitHandler<InputForm> = async (data) => {
 	const { id, ...rest } = await Https.updatePerson(String(personId), String(toEditContactId), data);
 	if (!Object.getOwnPropertyNames(rest)) {
 	  alert("Not Updated");
 	}
 	window.location.reload();
+  };
+
+  const submitContactAddiontion: SubmitHandler<InputForm> = async (data) => {
+	const payload = { ...data, personId };
+	const { id, ...rest } = await Https.createContact(payload);
+	if (!Object.getOwnPropertyNames(rest)) {
+	  alert("Not Updated");
+	}
+	setRenderNotf(true);
+	setTimeout(() => window.location.reload(), 700)
   };
 
   return (
@@ -63,10 +73,30 @@ export default function PersonPage() {
 		  )}
 		</S.Info>
 		<S.ButtonSection>
+		  <S.ButtonAdd onClick={() => setToAddNewContact(1)}>Adicionar Novo Contato</S.ButtonAdd>
 		  <S.ButtonDel onClick={deleteHandler}>Deletar Cadastro</S.ButtonDel>
 		</S.ButtonSection>
 	  </S.DivMain>
-	  { !!toEditContactId && <S.Form onSubmit={handleSubmit(submitFormHandler)}>
+
+	  { !!toAddNewContact && <S.Form onSubmit={handleSubmit(submitContactAddiontion)}>
+		<S.Div>
+		  <S.Label>Tipo de Contato:</S.Label>
+		  <S.Select {...register("type")}>
+			<S.Option value="">Escolha um tipo</S.Option>
+			<S.Option value="email">Email</S.Option>
+			<S.Option value="tel">Tel</S.Option>
+		  </S.Select>
+		</S.Div>
+		<S.Div>
+		  <S.Label>Contato:</S.Label>
+		  <S.Input {...register("description")}/>
+		</S.Div>
+		<S.Div>
+		  <S.Button type="submit">Adicionar</S.Button>
+		</S.Div>
+	  </S.Form> }
+
+	  { !!toEditContactId && <S.Form onSubmit={handleSubmit(submitPersonEdition)}>
 		<S.Div>
 		  <S.Label>Nome:</S.Label>
 		  <S.Input {...register("name")}/>
@@ -91,7 +121,7 @@ export default function PersonPage() {
 		  <S.Button type="submit">Enviar</S.Button>
 		</S.Div>
 	  </S.Form> }
-	  { renderNotf && <Notifier message="Cadastro Removido com Sucesso" type="success"/> }
+	  { renderNotf && <Notifier message="solicitação feita com Sucesso" type="success"/> }
 	</>
   );
 };

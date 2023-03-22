@@ -52,7 +52,14 @@ export const Info = styled.div `
 export const ButtonSection = styled.div `
   width: 100%;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+
+  @media (min-width: 768px) {
+	flex-direction: row;
+	gap: 40px;
+  }
 `;
 
 export const ButtonDel = styled.button `
@@ -62,6 +69,10 @@ export const ButtonDel = styled.button `
   cursor: pointer;
   color: #fff;
   background: rgb(245 0 0);
+`;
+
+export const ButtonAdd = styled(ButtonDel) `
+  background: rgb(48, 147, 77);
 `;
 
 export const ButtonEdit = styled.button `

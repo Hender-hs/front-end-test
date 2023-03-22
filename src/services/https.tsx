@@ -4,7 +4,7 @@ import axios  from "axios";
 
 export class Https {
   
-  static url = process.env.API_URL || "http://localhost:3000";
+  static url = process.env.REACT_APP_API_URL;
 
   private static getReqOptions(): AxiosRequestConfig {
 	return { 
@@ -58,7 +58,6 @@ export class Https {
 	return res.data;
   }
 
-
   static async getAllContacts(): Promise<I.ContactBodyRes[]> {
 	const endpoint = `/contact/all`;
 	const res = await axios.get(endpoint, this.getReqOptions());
@@ -77,9 +76,15 @@ export class Https {
 	return res.data;
   }
 
+  static async createContact(payload: I.ContactBodyReq): Promise<I.ContactBodyRes> {
+	const endpoint = `/contact/create`;
+	const res = await axios.post(endpoint, payload, this.getReqOptions());
+	return res.data;
+  }
+
   static async updateContact(id: string, payload: I.ContactBodyReq): Promise<I.ContactBodyRes> {
 	const endpoint = `/contact/${id}`;
-	const res = await axios.patch(endpoint, payload);
+	const res = await axios.patch(endpoint, payload, this.getReqOptions());
 	return res.data;
   }
 
