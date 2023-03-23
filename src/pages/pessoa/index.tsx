@@ -1,46 +1,50 @@
 import { Https } from "../../services/https";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useReducer } from "react";
 import { useParams } from "react-router-dom";
 import * as S from "./styles";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { Form } from "../../components/form";
+import reducer from "./reducer";
 import Notifier from "../../components/notifier";
+import { SubmitHandler } from "react-hook-form";
 
-
-type InputForm = I.PersonBodyReq & I.ContactBodyReq;
+export type ReducerIds = {
+  editContactAndInfo: boolean;
+  addContact: boolean;
+}
 
 export default function PersonPage() {
-  const { id: personId } = useParams();
+  const personId = Number(useParams().id);
   
   const [personInfo, setPersonInfo] = useState<I.PersonBodyRes>({} as I.PersonBodyRes);
-  const [toEditContactId, setToEditContactId] = useState<number>(0);
-  const [toAddNewContact, setToAddNewContact] = useState<number>(0);
-  const [renderNotf, setRenderNotf] = useState<boolean>(false);
+  const [contactIdToEdit, setContactIdToEdit] = useState<number>(0);
+  const [isRenderNotf, setIsRenderNotf] = useState<boolean>(false);
+  const [openForm, openFormDispatch] = useReducer(reducer, { 
+	editContactAndInfo: false,
+	addContact: false,
+  });
 
   const getPerson = () => {
 	if (!personId)
 	  return;
-	Https.getPerson(personId)
+	Https.getPerson(String(personId))
 	  .then(res => setPersonInfo(res));	
   }
 
-  useEffect(() => {
-	getPerson();
-  }, []);
-
-  const editHandler = (contactId: number) => {
-	setToEditContactId((prvSta) => prvSta ? 0 : contactId);
+ const editInfoHandler = (contactId: number) => {
+	openFormDispatch({ type: "edit_cont_and_info" });
+	setContactIdToEdit(contactId)
   };
 
   const deleteHandler = () => {
-  	Https.deletePerson(String(personId))
-	  .then(res => res.success && setRenderNotf(true));
+	Https.deletePerson(String(personId))
+	  .then(res => res.success && setIsRenderNotf(true));
 	setTimeout(() => window.location.replace("/"), 700);
   };
 
-  const { register, handleSubmit } = useForm<InputForm>();
-
   const submitPersonEdition: SubmitHandler<InputForm> = async (data) => {
-	const { id, ...rest } = await Https.updatePerson(String(personId), String(toEditContactId), data);
+	const { id, ...rest } = await Https.updatePerson(
+	  String(personId), String(contactIdToEdit), data
+	);
 	if (!Object.getOwnPropertyNames(rest)) {
 	  alert("Not Updated");
 	}
@@ -53,9 +57,14 @@ export default function PersonPage() {
 	if (!Object.getOwnPropertyNames(rest)) {
 	  alert("Not Updated");
 	}
-	setRenderNotf(true);
+	setIsRenderNotf(true);
 	setTimeout(() => window.location.reload(), 700)
   };
+
+
+  useEffect(() => {
+	getPerson();
+  }, []);
 
   return (
 	<>
@@ -64,64 +73,47 @@ export default function PersonPage() {
 		<S.Info>
 		  <S.H3>{personInfo && personInfo?.name}</S.H3>
 		  <S.H4>CPF: {personInfo && personInfo?.cpf}</S.H4>
-		  { personInfo?.contact?.map((el, i) => (
+		  {
+			personInfo?.contact?.map((contact, i) => (
 			  <S.Div key={i} style={{justifyContent: "center"}}>
-				<S.H5>{el?.type}: {el?.description}</S.H5>
-				<S.ButtonEdit onClick={() => editHandler(el.id)}>Editar Contato</S.ButtonEdit>
+				<S.H5>{contact?.type}: {contact?.description}</S.H5>
+				<S.ButtonEdit onClick={() => editInfoHandler(contact.id)}>Editar Contato</S.ButtonEdit>
 			  </S.Div>
-			)
-		  )}
+			))
+		  }
 		</S.Info>
 		<S.ButtonSection>
-		  <S.ButtonAdd onClick={() => setToAddNewContact(1)}>Adicionar Novo Contato</S.ButtonAdd>
-		  <S.ButtonDel onClick={deleteHandler}>Deletar Cadastro</S.ButtonDel>
+		  <S.ButtonAdd 
+			onClick={() => openFormDispatch({ type: "add_contact" })}
+		  >Adicionar Novo Contato
+		  </S.ButtonAdd>
+		  <S.ButtonDel 
+			onClick={deleteHandler}
+		  >Deletar Cadastro
+		  </S.ButtonDel>
 		</S.ButtonSection>
 	  </S.DivMain>
-
-	  { !!toAddNewContact && <S.Form onSubmit={handleSubmit(submitContactAddiontion)}>
-		<S.Div>
-		  <S.Label>Tipo de Contato:</S.Label>
-		  <S.Select {...register("type")}>
-			<S.Option value="">Escolha um tipo</S.Option>
-			<S.Option value="email">Email</S.Option>
-			<S.Option value="tel">Tel</S.Option>
-		  </S.Select>
-		</S.Div>
-		<S.Div>
-		  <S.Label>Contato:</S.Label>
-		  <S.Input {...register("description")}/>
-		</S.Div>
-		<S.Div>
-		  <S.Button type="submit">Adicionar</S.Button>
-		</S.Div>
-	  </S.Form> }
-
-	  { !!toEditContactId && <S.Form onSubmit={handleSubmit(submitPersonEdition)}>
-		<S.Div>
-		  <S.Label>Nome:</S.Label>
-		  <S.Input {...register("name")}/>
-		</S.Div>
-		<S.Div>
-		  <S.Label>CPF:</S.Label>
-		  <S.Input {...register("cpf")}/>
-		</S.Div>
-		<S.Div>
-		  <S.Label>Tipo de Contato:</S.Label>
-		  <S.Select {...register("type")}>
-			<S.Option value="">Escolha um tipo</S.Option>
-			<S.Option value="email">Email</S.Option>
-			<S.Option value="tel">Tel</S.Option>
-		  </S.Select>
-		</S.Div>
-		<S.Div>
-		  <S.Label>Contato:</S.Label>
-		  <S.Input {...register("description")}/>
-		</S.Div>
-		<S.Div>
-		  <S.Button type="submit">Enviar</S.Button>
-		</S.Div>
-	  </S.Form> }
-	  { renderNotf && <Notifier message="solicitação feita com Sucesso" type="success"/> }
+	  { 
+		!!openForm?.addContact && 
+		<Form 
+		  formType={["contactInputs"]}
+		  submitHandler={submitContactAddiontion} 
+		/>
+	  }
+	  { 
+		!!openForm?.editContactAndInfo && 
+		<Form 
+		  formType={["personInputs", "contactInputs"]} 
+		  submitHandler={submitPersonEdition}
+		/>
+	  }
+	  { 
+		isRenderNotf && 
+		<Notifier
+		  message="solicitação concluída com Sucesso" 
+		  type="success"
+		/> 
+	  }
 	</>
   );
 };

@@ -1,3 +1,5 @@
+type InputForm = I.PersonBodyReq & I.ContactBodyReq;
+
 declare module I {
 
   type ContactType = "email" | "tel";
