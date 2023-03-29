@@ -1,4 +1,4 @@
-# Cadastre.me App - Megazord Test
+# Cadastre.me App
 
 This project is a project built with React.js.
 Here's the design: shorturl.at/eDQR5
